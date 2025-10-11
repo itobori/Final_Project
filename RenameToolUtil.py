@@ -11,27 +11,35 @@ def get_target_objects(scope):
             return []
         objs = []
         for s in sel:
-            children = cmds.listRelatives(s, allDescendents=True, fullPath=True) or []
+            children = cmds.listRelatives(s, allDescendents=True, fullPath=True, type="transform") or []
             objs.extend(children)
             objs.append(s)
         return objs
 
     elif scope == "Selected":
-        sel = cmds.ls(sl=True)
+        sel = cmds.ls(sl=True, long=True, type="transform")
         if not sel:
             cmds.warning("No object selected.")
         return sel
 
     elif scope == "All":
-        return cmds.ls(dag=True, long=True)
-    
+        # ✅ ดึงทุก object ใน Outliner (เฉพาะ transform node)
+        all_objs = cmds.ls(dag=True, long=True, type="transform") or []
+
+        # ✅ ตัดกล้องระบบ Maya ออก
+        system_cameras = {"persp", "top", "front", "side"}
+        all_objs = [obj for obj in all_objs if obj.split("|")[-1] not in system_cameras]
+
+        # ✅ ลบซ้ำกันออก (กัน rename ซ้ำ)
+        all_objs = list(dict.fromkeys(all_objs))
+
+        return all_objs
+
     return []
 
 
 def search_and_replace(search_text, replace_text, targets):
-    """
-    แทนที่ข้อความในชื่อ object
-    """
+    """แทนที่ข้อความในชื่อ object"""
     if not search_text:
         cmds.warning("Search text cannot be empty.")
         return
@@ -47,9 +55,7 @@ def search_and_replace(search_text, replace_text, targets):
 
 
 def rename_all(new_name, targets):
-    """
-    เปลี่ยนชื่อทั้งหมดตาม new_name โดยเพิ่มเลขต่อท้ายอัตโนมัติ
-    """
+    """เปลี่ยนชื่อทั้งหมดตาม new_name โดยเพิ่มเลขต่อท้ายอัตโนมัติ"""
     if not new_name:
         cmds.warning("New name cannot be empty.")
         return
@@ -62,9 +68,7 @@ def rename_all(new_name, targets):
 
 
 def add_prefix(prefix, targets):
-    """
-    เพิ่ม prefix ให้กับชื่อทั้งหมด
-    """
+    """เพิ่ม prefix ให้กับชื่อทั้งหมด"""
     if not prefix:
         cmds.warning("Prefix cannot be empty.")
         return
@@ -79,9 +83,7 @@ def add_prefix(prefix, targets):
 
 
 def process(mode, old_name, new_name, scope):
-    """
-    ฟังก์ชันหลัก — เรียกตาม mode ที่เลือก
-    """
+    """ฟังก์ชันหลัก — เรียกตาม mode ที่เลือก"""
     targets = get_target_objects(scope)
     if not targets:
         return
@@ -94,3 +96,4 @@ def process(mode, old_name, new_name, scope):
         add_prefix(new_name, targets)
     else:
         cmds.warning(f"Unknown mode: {mode}")
+
