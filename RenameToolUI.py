@@ -1,32 +1,26 @@
 try:
-    from PySide6 import QtCore, QtGui, QtWidgets
-    from shiboken6 import wrapInstance
-except:
     from PySide2 import QtCore, QtGui, QtWidgets
     from shiboken2 import wrapInstance
+except ImportError:
+    from PySide6 import QtCore, QtGui, QtWidgets
+    from shiboken6 import wrapInstance
 
 import maya.OpenMayaUI as omui
 from maya import cmds
-
-# ✅ แก้ชื่อ module ให้ตรงกับไฟล์ util ที่คุณมี (เช่น RenameToolUtil.py)
-import importlib
+import importlib, os
 from . import RenameToolUtil as Reui
 importlib.reload(Reui)
 
 
-ROOT_RESOURCE_DIR = 'C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resources'
-
-
 class MyStyleToolDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(MyStyleToolDialog, self).__init__(parent)
         self.setWindowTitle('RENAME TOOL')
-        self.resize(340, 480)
+        self.resize(340, 340)
+        self.setStyleSheet('background-color: #866d68;')
 
         # ---------- MAIN LAYOUT ----------
-        self.mainLayout = QtWidgets.QVBoxLayout()
-        self.setLayout(self.mainLayout)
-        self.setStyleSheet('background-color: #866d68;')
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
 
         # ---------- TITLE ----------
         self.titleLabel = QtWidgets.QLabel("RENAME TOOL")
@@ -34,18 +28,16 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.titleLabel.setStyleSheet('''
             QLabel {
                 color: white;
-                font-size: 26px;
+                font-size: 18px;
                 font-family: "Segoe UI";
                 font-weight: bold;
             }
         ''')
         self.mainLayout.addWidget(self.titleLabel)
 
-        # ---------- COMBO BOX ----------
+        # ---------- COMBO ----------
         self.comboBox = QtWidgets.QComboBox()
         self.comboBox.addItems(["Search and replace name", "Rename", "Prefix hierarchy"])
-        self.comboBox.currentIndexChanged.connect(self.index_changed)
-        self.mainLayout.addWidget(self.comboBox)
         self.comboBox.setStyleSheet('''
             QComboBox {
                 background-color: #c8a78e;
@@ -59,14 +51,10 @@ class MyStyleToolDialog(QtWidgets.QDialog):
             QComboBox:hover {
                 background-color: #532316;
             }
-            QComboBox QAbstractItemView {
-                background-color: #333;
-                color: white;
-                selection-background-color: #532316;
-            }
         ''')
+        self.mainLayout.addWidget(self.comboBox)
 
-        # ---------- CHECKBOXES (radio style) ----------
+        # ---------- CHECKBOX ----------
         self.checkboxLayout = QtWidgets.QHBoxLayout()
         self.mainLayout.addLayout(self.checkboxLayout)
 
@@ -96,43 +84,34 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                     background-color: #532316;
                     border: 2px solid #532316;
                 }
-                QCheckBox::indicator:hover {
-                    border: 2px solid #90E0FF;
-                }
             ''')
             self.checkboxLayout.addWidget(cb)
 
-        # ---------- SEARCH NAME INPUT ----------
+        # ---------- INPUT ----------
         self.nameLineEdit = QtWidgets.QLineEdit()
         self.nameLineEdit.setPlaceholderText("SEARCH NAME")
-        self.nameLineEdit.setStyleSheet('''
-            QLineEdit {
-                color: black;
-                background-color: white;
-                font-size: 18px;
-                font-weight: bold;
-            }
-        ''')
-        self.mainLayout.addWidget(self.nameLineEdit)
-
-        # ---------- NEW NAME INPUT ----------
         self.newNameLineEdit = QtWidgets.QLineEdit()
         self.newNameLineEdit.setPlaceholderText("NEW NAME")
-        self.newNameLineEdit.setStyleSheet('''
-            QLineEdit {
-                color: black;
-                background-color: white;
-                font-size: 18px;
-                font-weight: bold;
-            }
-        ''')
-        self.mainLayout.addWidget(self.newNameLineEdit)
+        for le in [self.nameLineEdit, self.newNameLineEdit]:
+            le.setStyleSheet('''
+                QLineEdit {
+                    color: black;
+                    background-color: white;
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+            ''')
+            self.mainLayout.addWidget(le)
 
-        # ---------- BUTTONS ----------
+        # ---------- BUTTON ----------
         self.buttonLayout = QtWidgets.QHBoxLayout()
         self.mainLayout.addLayout(self.buttonLayout)
 
         self.applyButton = QtWidgets.QPushButton('Apply')
+        self.cancelButton = QtWidgets.QPushButton('Cancel')
+        self.buttonLayout.addWidget(self.applyButton)
+        self.buttonLayout.addWidget(self.cancelButton)
+
         self.applyButton.setStyleSheet('''
             QPushButton {
                 background-color: #af2529;
@@ -142,11 +121,8 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                 padding: 8px;
                 font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #57141e;
-            }
+            QPushButton:hover { background-color: #57141e; }
         ''')
-        self.cancelButton = QtWidgets.QPushButton('Cancel')
         self.cancelButton.setStyleSheet('''
             QPushButton {
                 background-color: #7a2b0f;
@@ -156,25 +132,55 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                 padding: 8px;
                 font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #866c75;
-            }
+            QPushButton:hover { background-color: #866c75; }
         ''')
 
-        self.buttonLayout.addWidget(self.applyButton)
-        self.buttonLayout.addWidget(self.cancelButton)
-        self.mainLayout.addStretch()
+        # ---------- SUCCESS GIF ----------
+        self.successGifLabel = QtWidgets.QLabel()
+        self.successGifLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.successGifLabel.setVisible(False)
+        self.mainLayout.addWidget(self.successGifLabel)
 
         # ---------- CONNECTIONS ----------
         self.applyButton.clicked.connect(self.onApplyClicked)
         self.cancelButton.clicked.connect(self.close)
 
-    # ---------- SIGNAL HANDLERS ----------
-    def index_changed(self, i):
-        print(f"Index changed to {i}")
+    # ---------- SHOW GIF ANIMATION ----------
+    def showSuccessGif(self):
+        """แสดง GIF ตอน success แล้วซ่อนเองหลังจากเล่นจบ"""
+        GIF_PATH = "C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Happy Jonah Hill GIF.gif"
+        GIF_PATH = GIF_PATH.replace("//", "/")  # แก้ path สำหรับ Windows
 
+        if not os.path.exists(GIF_PATH):
+            QtWidgets.QMessageBox.warning(self, "GIF not found", f"ไม่พบไฟล์:\n{GIF_PATH}")
+            return
+
+        self.successGifLabel.setVisible(True)
+        self.successGifLabel.raise_()
+
+        self.movie = QtGui.QMovie(GIF_PATH)
+        self.movie.setCacheMode(QtGui.QMovie.CacheAll)
+        self.movie.setScaledSize(QtCore.QSize(150, 150))
+        self.successGifLabel.setMovie(self.movie)
+
+        if not self.movie.isValid():
+            QtWidgets.QMessageBox.warning(self, "Invalid GIF", "โหลดไฟล์ GIF ไม่สำเร็จ")
+            return
+
+        self.movie.start()
+        self.successGifLabel.show()
+        QtWidgets.QApplication.processEvents()  # <--- สำคัญมากสำหรับ Maya
+
+        # ให้ GIF หายไปหลัง 3 วินาที
+        QtCore.QTimer.singleShot(3000, self.hideSuccessGif)
+
+    def hideSuccessGif(self):
+        self.successGifLabel.setVisible(False)
+        if hasattr(self, "movie"):
+            self.movie.stop()
+
+    # ---------- APPLY ----------
     def onApplyClicked(self):
-        """เมื่อกด Apply — เรียกใช้ RenameToolUtil"""
         old_name = self.nameLineEdit.text().strip()
         new_name = self.newNameLineEdit.text().strip()
         mode = self.comboBox.currentText()
@@ -188,14 +194,12 @@ class MyStyleToolDialog(QtWidgets.QDialog):
 
         try:
             Reui.process(mode, old_name, new_name, scope)
-            QtWidgets.QMessageBox.information(self, "Success", f"✅ Rename process completed!/nMode: {mode}")
-            pixmap.setPixmap(QPixmap(f"{IMG_DIR}/boy.png"))
+            self.showSuccessGif()
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Error", f"❌ Failed to process:/n{e}")
+            QtWidgets.QMessageBox.critical(self, "Error", f"❌ Failed to process:\n{e}")
 
 
 def run():
-    """Run the UI in Maya"""
     global ui
     try:
         ui.close()
