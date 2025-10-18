@@ -12,15 +12,20 @@ from . import RenameToolUtil as Reui
 importlib.reload(Reui)
 
 
+from PySide2 import QtCore, QtGui, QtWidgets
+
 class MyStyleToolDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(MyStyleToolDialog, self).__init__(parent)
         self.setWindowTitle('RENAME TOOL')
-        self.resize(340, 340)
-        self.setStyleSheet('background-color: #866d68;')
+        self.resize(550, 450)
+        self.setStyleSheet('background-color: #2E051A;')
 
         # ---------- MAIN LAYOUT ----------
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout = QtWidgets.QGridLayout(self)
+        self.mainLayout.setContentsMargins(10, 10, 10, 10)
+        self.mainLayout.setSpacing(10)
+        self.setLayout(self.mainLayout)
 
         # ---------- TITLE ----------
         self.titleLabel = QtWidgets.QLabel("RENAME TOOL")
@@ -29,34 +34,53 @@ class MyStyleToolDialog(QtWidgets.QDialog):
             QLabel {
                 color: white;
                 font-size: 18px;
-                font-family: "Segoe UI";
+                font-family: "Aldrich";
                 font-weight: bold;
             }
         ''')
-        self.mainLayout.addWidget(self.titleLabel)
+        self.mainLayout.addWidget(self.titleLabel, 0, 2, 1, 3)
+
+        # ---------- SPINE ANIMATION (GIF) ----------
+        # self.animLabel = QtWidgets.QLabel()
+        # self.animLabel.setAlignment(QtCore.Qt.AlignLeft)
+        # self.mainLayout.addWidget(self.animLabel, 1, 1,QtCore.Qt.AlignLeft) 
+
+        # gif_path = r"C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Benedict Cumberbatch Magic GIF by Spider-Man (1).gif"
+        # self.movie = QtGui.QMovie(gif_path)
+
+        # if not self.movie.isValid():
+        #     print("❌ ไม่พบไฟล์ GIF ที่ระบุ:", gif_path)
+
+        # self.animLabel.setMovie(self.movie)
+        # self.movie.start()
+
+
+
+
+
 
         # ---------- COMBO ----------
         self.comboBox = QtWidgets.QComboBox()
-        self.comboBox.addItems(["Search and replace name", "Rename", "Prefix hierarchy"])
+        self.comboBox.addItems(["Search and replace name", "Rename", "Prefix","Suffix" ])
         self.comboBox.setStyleSheet('''
             QComboBox {
-                background-color: #c8a78e;
+                background-color: #A1024E;
                 color: white;
-                border-radius: 6px;
+                border-radius: 3px;
                 font-size: 16px;
                 padding: 4px;
-                font-family: "Segoe UI";
+                font-family: "Aldrich";
                 font-weight: bold;
             }
             QComboBox:hover {
-                background-color: #532316;
+                background-color: #FF5C8F;
             }
         ''')
-        self.mainLayout.addWidget(self.comboBox)
+        self.mainLayout.addWidget(self.comboBox, 0, 2, 2, 3)
 
         # ---------- CHECKBOX ----------
         self.checkboxLayout = QtWidgets.QHBoxLayout()
-        self.mainLayout.addLayout(self.checkboxLayout)
+        self.checkboxLayout.setAlignment(QtCore.Qt.AlignCenter)
 
         self.hierarchyCheck = QtWidgets.QCheckBox("Hierarchy")
         self.selectedCheck = QtWidgets.QCheckBox("Selected")
@@ -65,12 +89,14 @@ class MyStyleToolDialog(QtWidgets.QDialog):
 
         self.checkGroup = QtWidgets.QButtonGroup(self)
         self.checkGroup.setExclusive(True)
+
         for cb in [self.hierarchyCheck, self.selectedCheck, self.allCheck]:
             self.checkGroup.addButton(cb)
             cb.setStyleSheet('''
                 QCheckBox {
                     font-size: 14px;
                     color: white;
+                    font-family: "Aldrich";
                     spacing: 10px;
                 }
                 QCheckBox::indicator {
@@ -81,13 +107,16 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                     background-color: transparent;
                 }
                 QCheckBox::indicator:checked {
-                    background-color: #532316;
-                    border: 2px solid #532316;
+                    background-color: #D10A53;
+                    border: 2px solid #D10A53;
                 }
             ''')
             self.checkboxLayout.addWidget(cb)
 
+        self.mainLayout.addLayout(self.checkboxLayout, 1, 2, 3, 3)
+
         # ---------- INPUT ----------
+
         self.nameLineEdit = QtWidgets.QLineEdit()
         self.nameLineEdit.setPlaceholderText("SEARCH NAME")
         self.newNameLineEdit = QtWidgets.QLineEdit()
@@ -97,15 +126,17 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                 QLineEdit {
                     color: black;
                     background-color: white;
-                    font-size: 18px;
+                    font-family: "Aldrich";
+                    font-size: 16px;
                     font-weight: bold;
                 }
             ''')
-            self.mainLayout.addWidget(le)
+        self.mainLayout.addWidget(self.nameLineEdit, 2, 2, 1, 3)
+        self.mainLayout.addWidget(self.newNameLineEdit, 3, 2, 1, 3)
 
         # ---------- BUTTON ----------
         self.buttonLayout = QtWidgets.QHBoxLayout()
-        self.mainLayout.addLayout(self.buttonLayout)
+        self.mainLayout.addLayout(self.buttonLayout, 4, 2, 1, 3)
 
         self.applyButton = QtWidgets.QPushButton('Apply')
         self.cancelButton = QtWidgets.QPushButton('Cancel')
@@ -116,7 +147,8 @@ class MyStyleToolDialog(QtWidgets.QDialog):
             QPushButton {
                 background-color: #af2529;
                 color: white;
-                border-radius: 10px;
+                border-radius: 3px;
+                font-family: "Aldrich";
                 font-size: 16px;
                 padding: 8px;
                 font-weight: bold;
@@ -127,13 +159,15 @@ class MyStyleToolDialog(QtWidgets.QDialog):
             QPushButton {
                 background-color: #7a2b0f;
                 color: white;
-                border-radius: 10px;
+                border-radius: 3px;
+                font-family: "Aldrich";
                 font-size: 16px;
                 padding: 8px;
                 font-weight: bold;
             }
             QPushButton:hover { background-color: #866c75; }
         ''')
+
 
         # ---------- SUCCESS GIF ----------
         self.successGifLabel = QtWidgets.QLabel()
@@ -145,39 +179,52 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.applyButton.clicked.connect(self.onApplyClicked)
         self.cancelButton.clicked.connect(self.close)
 
-    # ---------- SHOW GIF ANIMATION ----------
+    # ---------- SHOW GIF IN NEW WINDOW ----------
     def showSuccessGif(self):
-        """แสดง GIF ตอน success แล้วซ่อนเองหลังจากเล่นจบ"""
-        GIF_PATH = "C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Happy Jonah Hill GIF.gif"
-        GIF_PATH = GIF_PATH.replace("//", "/")  # แก้ path สำหรับ Windows
+        """แสดง GIF success ในหน้าต่างใหม่ แล้วปิดอัตโนมัติ"""
+        GIF_PATH = "C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Benedict Cumberbatch Magic GIF by Spider-Man.gif"
+        GIF_PATH = GIF_PATH.replace("//", "/")
 
         if not os.path.exists(GIF_PATH):
             QtWidgets.QMessageBox.warning(self, "GIF not found", f"ไม่พบไฟล์:\n{GIF_PATH}")
             return
 
-        self.successGifLabel.setVisible(True)
-        self.successGifLabel.raise_()
+        # ---------- สร้างหน้าต่าง popup ----------
+        self.gifDialog = QtWidgets.QDialog(self)
+        self.gifDialog.setWindowTitle("Success!")
+        self.gifDialog.setModal(True)
+        self.gifDialog.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint)
+        self.gifDialog.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.gifDialog.setFixedSize(500, 500)
 
-        self.movie = QtGui.QMovie(GIF_PATH)
-        self.movie.setCacheMode(QtGui.QMovie.CacheAll)
-        self.movie.setScaledSize(QtCore.QSize(150, 150))
-        self.successGifLabel.setMovie(self.movie)
+        layout = QtWidgets.QVBoxLayout(self.gifDialog)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        if not self.movie.isValid():
-            QtWidgets.QMessageBox.warning(self, "Invalid GIF", "โหลดไฟล์ GIF ไม่สำเร็จ")
-            return
+        label = QtWidgets.QLabel()
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        layout.addWidget(label)
 
-        self.movie.start()
-        self.successGifLabel.show()
-        QtWidgets.QApplication.processEvents()  # <--- สำคัญมากสำหรับ Maya
+        # ---------- โหลด GIF ----------
+        movie = QtGui.QMovie(GIF_PATH)
+        movie.setCacheMode(QtGui.QMovie.CacheAll)
+        movie.setScaledSize(QtCore.QSize(700, 700))
+        label.setMovie(movie)
+        movie.start()
 
-        # ให้ GIF หายไปหลัง 3 วินาที
-        QtCore.QTimer.singleShot(3000, self.hideSuccessGif)
+        # ---------- ตั้งค่าพื้นหลังโปร่งใส ----------
+        self.gifDialog.setStyleSheet("""
+            QDialog {
+                background-color: rgba(0, 0, 0, 180);
+                border-radius: 15px;
+            }
+        """)
 
-    def hideSuccessGif(self):
-        self.successGifLabel.setVisible(False)
-        if hasattr(self, "movie"):
-            self.movie.stop()
+        # ---------- ตั้งเวลาให้ปิดเองหลัง 3 วิ ----------
+        QtCore.QTimer.singleShot(3000, self.gifDialog.accept)
+
+        # ---------- แสดง popup ----------
+        self.gifDialog.exec_()
 
     # ---------- APPLY ----------
     def onApplyClicked(self):

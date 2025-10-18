@@ -23,16 +23,10 @@ def get_target_objects(scope):
         return sel
 
     elif scope == "All":
-        # ✅ ดึงทุก object ใน Outliner (เฉพาะ transform node)
         all_objs = cmds.ls(dag=True, long=True, type="transform") or []
-
-        # ✅ ตัดกล้องระบบ Maya ออก
         system_cameras = {"persp", "top", "front", "side"}
         all_objs = [obj for obj in all_objs if obj.split("|")[-1] not in system_cameras]
-
-        # ✅ ลบซ้ำกันออก (กัน rename ซ้ำ)
         all_objs = list(dict.fromkeys(all_objs))
-
         return all_objs
 
     return []
@@ -82,6 +76,19 @@ def add_prefix(prefix, targets):
             cmds.warning(f"Cannot rename: {obj}")
 
 
+def add_suffix(suffix, targets):
+    if not suffix:
+        cmds.warning("Suffix cannot be empty.")
+        return
+    for obj in targets:
+        short_name = obj.split("|")[-1]
+        new_name = f"{short_name}{suffix}"
+        try:
+            cmds.rename(obj, new_name)
+        except:
+            cmds.warning(f"Cannot rename: {obj}")
+
+
 def process(mode, old_name, new_name, scope):
     """ฟังก์ชันหลัก — เรียกตาม mode ที่เลือก"""
     targets = get_target_objects(scope)
@@ -90,10 +97,15 @@ def process(mode, old_name, new_name, scope):
 
     if mode == "Search and replace name":
         search_and_replace(old_name, new_name, targets)
+
     elif mode == "Rename":
         rename_all(new_name, targets)
-    elif mode == "Prefix hierarchy":
+
+    elif mode == "Prefix":
         add_prefix(new_name, targets)
+
+    elif mode == "Suffix":  # ✅ เพิ่มเงื่อนไขนี้ให้ตรงกับใน UI
+        add_suffix(new_name, targets)
+
     else:
         cmds.warning(f"Unknown mode: {mode}")
-
