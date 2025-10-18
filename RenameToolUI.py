@@ -79,41 +79,27 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.mainLayout.addWidget(self.comboBox, 0, 2, 2, 3)
 
         # ---------- CHECKBOX ----------
-        self.checkboxLayout = QtWidgets.QHBoxLayout()
-        self.checkboxLayout.setAlignment(QtCore.Qt.AlignCenter)
+        self.RadioButton = QtWidgets.QHBoxLayout()
+        self.RadioButton.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.hierarchyCheck = QtWidgets.QCheckBox("Hierarchy")
-        self.selectedCheck = QtWidgets.QCheckBox("Selected")
-        self.allCheck = QtWidgets.QCheckBox("All")
-        self.selectedCheck.setChecked(True)
-
-        self.checkGroup = QtWidgets.QButtonGroup(self)
-        self.checkGroup.setExclusive(True)
+        self.hierarchyCheck = QtWidgets.QRadioButton("Hierarchy")
+        self.selectedCheck = QtWidgets.QRadioButton("Selected")
+        self.allCheck = QtWidgets.QRadioButton("All")
+        
 
         for cb in [self.hierarchyCheck, self.selectedCheck, self.allCheck]:
-            self.checkGroup.addButton(cb)
             cb.setStyleSheet('''
                 QCheckBox {
-                    font-size: 14px;
+                    font-size: 16px;
                     color: white;
                     font-family: "Aldrich";
-                    spacing: 10px;
+                    spacing: 20px;
                 }
-                QCheckBox::indicator {
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 8px;
-                    border: 2px solid white;
-                    background-color: transparent;
-                }
-                QCheckBox::indicator:checked {
-                    background-color: #D10A53;
-                    border: 2px solid #D10A53;
-                }
+            
             ''')
-            self.checkboxLayout.addWidget(cb)
+            self.RadioButton.addWidget(cb)
 
-        self.mainLayout.addLayout(self.checkboxLayout, 1, 2, 3, 3)
+        self.mainLayout.addLayout(self.RadioButton, 1, 2, 3, 3)
 
         # ---------- INPUT ----------
 
