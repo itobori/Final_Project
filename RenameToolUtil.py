@@ -1,5 +1,93 @@
 import maya.cmds as cmds
 
+from PySide2 import QtCore, QtGui, QtWidgets
+
+# ========================
+# 🔹 ปุ่มแบบมีเอฟเฟกต์เฉียง
+# ========================
+class AnimatedButton(QtWidgets.QPushButton):
+    def __init__(self, text, parent=None):
+        super().__init__(text, parent)
+        self.setFixedHeight(40)
+        self.setStyleSheet('''
+            QPushButton {
+                color: white;
+                background-color: transparent;
+                border: 2px solid #FF723D;
+                text-transform: uppercase;
+                font-family: "Aldrich";
+                letter-spacing: 2px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        ''')
+
+        # ---------- เอฟเฟกต์เฉียง ----------
+        self.overlay = QtWidgets.QFrame(self)
+        self.overlay.setStyleSheet("background-color: #FF723D;")
+        self.overlay.setGeometry(-100, 0, 0, self.height())
+        self.overlay.setGraphicsEffect(QtWidgets.QGraphicsOpacityEffect(self.overlay))
+        self.overlay.graphicsEffect().setOpacity(0.5)
+
+        # ตั้งค่า animation
+        self.anim = QtCore.QPropertyAnimation(self.overlay, b"geometry")
+        self.anim.setDuration(800)
+        self.anim.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
+
+    def enterEvent(self, event):
+        """เมื่อ hover เข้ามา"""
+        self.anim.stop()
+        start_rect = QtCore.QRect(-100, 0, 0, self.height())
+        end_rect = QtCore.QRect(-20, 0, self.width() + 100, self.height())
+        self.anim.setStartValue(start_rect)
+        self.anim.setEndValue(end_rect)
+        self.anim.start()
+
+        # เปลี่ยนสีตัวอักษร
+        self.setStyleSheet('''
+            QPushButton {
+                color: #833ab4;
+                background-color: transparent;
+                border: 2px solid #FF723D;
+                text-transform: uppercase;
+                font-family: "Aldrich";
+                letter-spacing: 2px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        ''')
+
+    def leaveEvent(self, event):
+        """เมื่อออกจาก hover"""
+        self.anim.stop()
+        start_rect = self.overlay.geometry()
+        end_rect = QtCore.QRect(-100, 0, 0, self.height())
+        self.anim.setStartValue(start_rect)
+        self.anim.setEndValue(end_rect)
+        self.anim.start()
+
+        # กลับสีข้อความ
+        self.setStyleSheet('''
+            QPushButton {
+                color: #FF723D;
+                background-color: transparent;
+                border: 2px solid #FF723D;
+                text-transform: uppercase;
+                font-family: "Aldrich";
+                letter-spacing: 2px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        ''')
+
+
+
+        #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
+
+
+
+
+
 def get_target_objects(scope):
     """
     คืนค่ารายชื่อ object ตาม scope ที่เลือก (Hierarchy, Selected, All)

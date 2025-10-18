@@ -14,12 +14,19 @@ importlib.reload(Reui)
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
+
+
+
+
+
+#__________________________________________________________________________________#
+
 class MyStyleToolDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(MyStyleToolDialog, self).__init__(parent)
         self.setWindowTitle('RENAME TOOL')
         self.resize(550, 450)
-        self.setStyleSheet('background-color: #2E051A;')
+        self.setStyleSheet('background-color: 858585;')
 
         # ---------- MAIN LAYOUT ----------
         self.mainLayout = QtWidgets.QGridLayout(self)
@@ -32,27 +39,27 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.titleLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.titleLabel.setStyleSheet('''
             QLabel {
-                color: white;
+                color: 474747;
                 font-size: 18px;
                 font-family: "Aldrich";
                 font-weight: bold;
             }
         ''')
-        self.mainLayout.addWidget(self.titleLabel, 0, 2, 1, 3)
+        self.mainLayout.addWidget(self.titleLabel, 0, 2, 1, 2)
 
         # ---------- SPINE ANIMATION (GIF) ----------
-        # self.animLabel = QtWidgets.QLabel()
-        # self.animLabel.setAlignment(QtCore.Qt.AlignLeft)
-        # self.mainLayout.addWidget(self.animLabel, 1, 1,QtCore.Qt.AlignLeft) 
+        self.animLabel = QtWidgets.QLabel()
+        self.animLabel.setAlignment(QtCore.Qt.AlignLeft)
+        self.mainLayout.addWidget(self.animLabel, 1, 1,QtCore.Qt.AlignLeft) 
 
-        # gif_path = r"C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Benedict Cumberbatch Magic GIF by Spider-Man (1).gif"
-        # self.movie = QtGui.QMovie(gif_path)
+        gif_path = r"C:/Users/itobo/OneDrive/เอกสาร/maya/2024/scripts/Final_Project/resourches/image/Benedict Cumberbatch Magic GIF by Spider-Man (1).gif"
+        self.movie = QtGui.QMovie(gif_path)
 
-        # if not self.movie.isValid():
-        #     print("❌ ไม่พบไฟล์ GIF ที่ระบุ:", gif_path)
+        if not self.movie.isValid():
+            print("❌ ไม่พบไฟล์ GIF ที่ระบุ:", gif_path)
 
-        # self.animLabel.setMovie(self.movie)
-        # self.movie.start()
+        self.animLabel.setMovie(self.movie)
+        self.movie.start()
 
 
 
@@ -65,7 +72,7 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.comboBox.setStyleSheet('''
             QComboBox {
                 background-color: #A1024E;
-                color: white;
+                color: 474747;
                 border-radius: 3px;
                 font-size: 16px;
                 padding: 4px;
@@ -76,9 +83,9 @@ class MyStyleToolDialog(QtWidgets.QDialog):
                 background-color: #FF5C8F;
             }
         ''')
-        self.mainLayout.addWidget(self.comboBox, 0, 2, 2, 3)
+        self.mainLayout.addWidget(self.comboBox, 0, 2, 2, 2)
 
-        # ---------- CHECKBOX ----------
+        # ---------- RadioButton ----------
         self.RadioButton = QtWidgets.QHBoxLayout()
         self.RadioButton.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -89,17 +96,35 @@ class MyStyleToolDialog(QtWidgets.QDialog):
 
         for cb in [self.hierarchyCheck, self.selectedCheck, self.allCheck]:
             cb.setStyleSheet('''
-                QCheckBox {
+                RadioButton {
                     font-size: 16px;
-                    color: white;
+                    color: 474747;
                     font-family: "Aldrich";
+                    padding: 4px;
                     spacing: 20px;
                 }
-            
+                QRadioButton::indicator {
+                    width: 16px;                   /* ขยายวงกลม */
+                    height: 16px;
+                }
+                QRadioButton::indicator:checked {
+                    background-color: #FF5C8F;
+                    border: 2px solid 474747;
+                    border-radius: 8px;
+                }
+                QRadioButton::indicator:unchecked {
+                    background-color: #444;
+                    border: 2px solid #aaa;
+                    border-radius: 8px;
+                }
+                QRadioButton::indicator:hover {
+                    border: 2px solid #A1024E;
+                }
+                
             ''')
             self.RadioButton.addWidget(cb)
 
-        self.mainLayout.addLayout(self.RadioButton, 1, 2, 3, 3)
+        self.mainLayout.addLayout(self.RadioButton, 1, 2, 3, 2)
 
         # ---------- INPUT ----------
 
@@ -110,49 +135,25 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         for le in [self.nameLineEdit, self.newNameLineEdit]:
             le.setStyleSheet('''
                 QLineEdit {
-                    color: black;
-                    background-color: white;
+                    color: white;
+                    background-color: 474747;
                     font-family: "Aldrich";
                     font-size: 16px;
                     font-weight: bold;
                 }
             ''')
-        self.mainLayout.addWidget(self.nameLineEdit, 2, 2, 1, 3)
-        self.mainLayout.addWidget(self.newNameLineEdit, 3, 2, 1, 3)
+        self.mainLayout.addWidget(self.nameLineEdit, 2, 2, 1, 2)
+        self.mainLayout.addWidget(self.newNameLineEdit, 3, 2, 1, 2)
 
         # ---------- BUTTON ----------
         self.buttonLayout = QtWidgets.QHBoxLayout()
-        self.mainLayout.addLayout(self.buttonLayout, 4, 2, 1, 3)
+        self.mainLayout.addLayout(self.buttonLayout, 4, 2, 1, 2)
 
-        self.applyButton = QtWidgets.QPushButton('Apply')
-        self.cancelButton = QtWidgets.QPushButton('Cancel')
+        self.applyButton = AnimatedButton('Apply')
+        self.cancelButton = AnimatedButton('Cancel')
+        
         self.buttonLayout.addWidget(self.applyButton)
         self.buttonLayout.addWidget(self.cancelButton)
-
-        self.applyButton.setStyleSheet('''
-            QPushButton {
-                background-color: #af2529;
-                color: white;
-                border-radius: 3px;
-                font-family: "Aldrich";
-                font-size: 16px;
-                padding: 8px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #57141e; }
-        ''')
-        self.cancelButton.setStyleSheet('''
-            QPushButton {
-                background-color: #7a2b0f;
-                color: white;
-                border-radius: 3px;
-                font-family: "Aldrich";
-                font-size: 16px;
-                padding: 8px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #866c75; }
-        ''')
 
 
         # ---------- SUCCESS GIF ----------
@@ -161,7 +162,7 @@ class MyStyleToolDialog(QtWidgets.QDialog):
         self.successGifLabel.setVisible(False)
         self.mainLayout.addWidget(self.successGifLabel)
 
-        # ---------- CONNECTIONS ----------
+        # # ---------- CONNECTIONS ----------
         self.applyButton.clicked.connect(self.onApplyClicked)
         self.cancelButton.clicked.connect(self.close)
 
