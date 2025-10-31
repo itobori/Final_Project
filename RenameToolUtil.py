@@ -1,97 +1,7 @@
 import maya.cmds as cmds
 
-from PySide2 import QtCore, QtGui, QtWidgets
-
-# ========================
-# 🔹 ปุ่มแบบมีเอฟเฟกต์เฉียง
-# ========================
-class AnimatedButton(QtWidgets.QPushButton):
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
-        self.setFixedHeight(40)
-        self.setStyleSheet('''
-            QPushButton {
-                color: white;
-                background-color: transparent;
-                border: 2px solid #FF723D;
-                text-transform: uppercase;
-                font-family: "Aldrich";
-                letter-spacing: 2px;
-                font-size: 16px;
-                font-weight: bold;
-            }
-        ''')
-
-        # ---------- เอฟเฟกต์เฉียง ----------
-        self.overlay = QtWidgets.QFrame(self)
-        self.overlay.setStyleSheet("background-color: #FF723D;")
-        self.overlay.setGeometry(-100, 0, 0, self.height())
-        self.overlay.setGraphicsEffect(QtWidgets.QGraphicsOpacityEffect(self.overlay))
-        self.overlay.graphicsEffect().setOpacity(0.5)
-
-        # ตั้งค่า animation
-        self.anim = QtCore.QPropertyAnimation(self.overlay, b"geometry")
-        self.anim.setDuration(800)
-        self.anim.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
-
-    def enterEvent(self, event):
-        """เมื่อ hover เข้ามา"""
-        self.anim.stop()
-        start_rect = QtCore.QRect(-100, 0, 0, self.height())
-        end_rect = QtCore.QRect(-20, 0, self.width() + 100, self.height())
-        self.anim.setStartValue(start_rect)
-        self.anim.setEndValue(end_rect)
-        self.anim.start()
-
-        # เปลี่ยนสีตัวอักษร
-        self.setStyleSheet('''
-            QPushButton {
-                color: #833ab4;
-                background-color: transparent;
-                border: 2px solid #FF723D;
-                text-transform: uppercase;
-                font-family: "Aldrich";
-                letter-spacing: 2px;
-                font-size: 16px;
-                font-weight: bold;
-            }
-        ''')
-
-    def leaveEvent(self, event):
-        """เมื่อออกจาก hover"""
-        self.anim.stop()
-        start_rect = self.overlay.geometry()
-        end_rect = QtCore.QRect(-100, 0, 0, self.height())
-        self.anim.setStartValue(start_rect)
-        self.anim.setEndValue(end_rect)
-        self.anim.start()
-
-        # กลับสีข้อความ
-        self.setStyleSheet('''
-            QPushButton {
-                color: #FF723D;
-                background-color: transparent;
-                border: 2px solid #FF723D;
-                text-transform: uppercase;
-                font-family: "Aldrich";
-                letter-spacing: 2px;
-                font-size: 16px;
-                font-weight: bold;
-            }
-        ''')
-
-
-
-        #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
-
-
-
-
-
 def get_target_objects(scope):
-    """
-    คืนค่ารายชื่อ object ตาม scope ที่เลือก (Hierarchy, Selected, All)
-    """
+  
     if scope == "Hierarchy":
         sel = cmds.ls(sl=True, long=True)
         if not sel:
@@ -121,23 +31,26 @@ def get_target_objects(scope):
 
 
 def search_and_replace(search_text, replace_text, targets):
-    """แทนที่ข้อความในชื่อ object"""
+    
     if not search_text:
         cmds.warning("Search text cannot be empty.")
         return
 
+    renamed_count = 0
     for obj in targets:
         short_name = obj.split("|")[-1]
         if search_text in short_name:
             new_name = short_name.replace(search_text, replace_text)
             try:
                 cmds.rename(obj, new_name)
-            except:
-                cmds.warning(f"Cannot rename: {obj}")
+                renamed_count += 1
+            except Exception as e:
+                cmds.warning(f"Cannot rename '{short_name}': {e}")
+    print(f"Search and Replace: Renamed {renamed_count} object(s).")
 
 
 def rename_all(new_name, targets):
-    """เปลี่ยนชื่อทั้งหมดตาม new_name โดยเพิ่มเลขต่อท้ายอัตโนมัติ"""
+    
     if not new_name:
         cmds.warning("New name cannot be empty.")
         return
@@ -145,12 +58,14 @@ def rename_all(new_name, targets):
     for i, obj in enumerate(targets, start=1):
         try:
             cmds.rename(obj, f"{new_name}_{i:02d}")
-        except:
-            cmds.warning(f"Cannot rename: {obj}")
+        except Exception as e:
+            short_name = obj.split("|")[-1]
+            cmds.warning(f"Cannot rename '{short_name}': {e}")
+    print(f"Rename: Renamed {len(targets)} object(s).")
 
 
 def add_prefix(prefix, targets):
-    """เพิ่ม prefix ให้กับชื่อทั้งหมด"""
+    
     if not prefix:
         cmds.warning("Prefix cannot be empty.")
         return
@@ -160,27 +75,32 @@ def add_prefix(prefix, targets):
         new_name = f"{prefix}{short_name}"
         try:
             cmds.rename(obj, new_name)
-        except:
-            cmds.warning(f"Cannot rename: {obj}")
+        except Exception as e:
+            cmds.warning(f"Cannot rename '{short_name}': {e}")
+    print(f"Prefix: Added prefix to {len(targets)} object(s).")
 
 
 def add_suffix(suffix, targets):
+    
     if not suffix:
         cmds.warning("Suffix cannot be empty.")
         return
+        
     for obj in targets:
         short_name = obj.split("|")[-1]
         new_name = f"{short_name}{suffix}"
         try:
             cmds.rename(obj, new_name)
-        except:
-            cmds.warning(f"Cannot rename: {obj}")
+        except Exception as e:
+            cmds.warning(f"Cannot rename '{short_name}': {e}")
+    print(f"Suffix: Added suffix to {len(targets)} object(s).")
 
 
 def process(mode, old_name, new_name, scope):
-    """ฟังก์ชันหลัก — เรียกตาม mode ที่เลือก"""
+    
     targets = get_target_objects(scope)
     if not targets:
+        print("No target objects found for the selected scope.")
         return
 
     if mode == "Search and replace name":
@@ -192,7 +112,7 @@ def process(mode, old_name, new_name, scope):
     elif mode == "Prefix":
         add_prefix(new_name, targets)
 
-    elif mode == "Suffix":  # ✅ เพิ่มเงื่อนไขนี้ให้ตรงกับใน UI
+    elif mode == "Suffix":
         add_suffix(new_name, targets)
 
     else:
